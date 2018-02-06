@@ -1,6 +1,6 @@
-# Heroku Buildpack for Ruby Oracle
+# Heroku Buildpack for Oracle
 
-Heroku buildpack for setting up Oracle Instant Client and the `LD_LIBRARY_PATH` so that Bundler can build [ruby-oci8](https://github.com/kubo/ruby-oci8)
+Heroku buildpack for setting up Oracle Instant Client and the `LD_LIBRARY_PATH`.
 
 # Usage
 
@@ -12,28 +12,14 @@ In order for this buildpack to execute, it will look for a `.oracle.yml` file in
 
 ## Add Buildpack
 
-You'll need to use multiple buildpacks. This buildpack will need to be invoked first, followed by [heroku-buildpack-ruby](https://github.com/heroku/heroku-buildpack-ruby).  Heroku now supports configuring multiple buildpacks natively, or you can use the [heroku-buildpack-multi](https://github.com/ddollar/heroku-buildpack-multi) buildpack.
+You'll need to use multiple buildpacks. This buildpack will need to be invoked first, followed by your language buildpack.  Heroku now supports configuring multiple buildpacks natively, or you can use the [heroku-buildpack-multi](https://github.com/ddollar/heroku-buildpack-multi) buildpack.
 
 ### Setup using heroku-buildpack-multi
 
-The benefit to using [heroku-buildpack-multi](https://github.com/ddollar/heroku-buildpack-multi) is that you can version-control your environment changes.
-
-    heroku buildpacks:clear
-    heroku buildpacks:set https://github.com/ddollar/heroku-buildpack-multi
-
-Then inside `.buildpacks`, add the following contents:
+Add the following contents to `.buildpacks`:
 
     https://github.com/wealthsimple/oracle-heroku-buildpack
-    https://github.com/heroku/heroku-buildpack-ruby
-
-### Setup using heroku's native support for multiple buildpacks
-
-Heroku natively also support's multiple buildpacks, the same setup as above can be achieved as follows:
-
-    heroku buildpacks:clear
-    heroku buildpacks:set https://github.com/heroku/heroku-buildpack-ruby
-    heroku buildpacks:add --index 1 https://github.com/ddollar/heroku-buildpack-multi
-
+    https://github.com/heroku/heroku-buildpack-python
 
 # Configuration (Optional)
 
