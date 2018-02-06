@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+shopt -s extglob
+shopt -s nullglob
+
+# Syntax sugar.
+indent() {
+  echo "       $*"
+}
+
+# Buildpack Steps.
+puts-step() {
+  echo "-----> $*"
+}
+
+# Buildpack Warnings.
+puts-warn() {
+  echo " !     $*"
+}
