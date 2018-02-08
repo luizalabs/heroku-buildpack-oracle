@@ -51,10 +51,26 @@ if [[ -s $ORACLE_CONFIG ]]; then
   fi
 fi
 
+ORACLE_HOME="${BUILD_DIR}/${ORACLE_INSTANT_CLIENT_DIR}"
+
+indent "Create oci8.pc"
+cat <<EOF > $ORACLE_HOME/oci8.pc
+# Package Information for pkg-config
+
+prefix=${ORACLE_HOME}
+libdir=\${prefix}
+includedir=\${prefix}/sdk/include/
+
+Name: OCI
+Description: Oracle database engine
+Version: 11.2
+Libs: -L\${libdir} -lclntsh
+Libs.private:
+Cflags: -I\${includedir}
+EOF
+
 indent "Create profile.d script"
 mkdir -p ${BUILD_DIR}/.profile.d
-
-ORACLE_HOME="${BUILD_DIR}/${ORACLE_INSTANT_CLIENT_DIR}"
 
 cat <<EOF > ${BUILD_DIR}/.profile.d/oracle.sh
   export OCI_LIB_DIR=${ORACLE_HOME}
@@ -63,6 +79,7 @@ cat <<EOF > ${BUILD_DIR}/.profile.d/oracle.sh
   export LD_LIBRARY_PATH=${ORACLE_HOME}:\$LD_LIBRARY_PATH}
   export PATH=${ORACLE_HOME}:\$PATH
   export TNS_ADMIN=${ORACLE_HOME}/network/admin
+  export PKG_CONFIG_PATH=${ORACLE_HOME}
 EOF
 
 source ${BUILD_DIR}/.profile.d/oracle.sh
