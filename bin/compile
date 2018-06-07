@@ -53,11 +53,24 @@ fi
 
 ORACLE_HOME="${BUILD_DIR}/${ORACLE_INSTANT_CLIENT_DIR}"
 
-echo ${ORACLE_HOME}
-echo ${PKG_CONFIG_PATH}
+indent "Create profile.d script"
+mkdir -p ${BUILD_DIR}/.profile.d
+
+cat <<EOF > ${BUILD_DIR}/.profile.d/oracle.sh
+  export OCI_LIB_DIR=${ORACLE_HOME}
+  export ORACLE_HOME=${ORACLE_HOME}
+  export OCI_INC_DIR=${ORACLE_HOME}/sdk/include
+  export LD_LIBRARY_PATH=${ORACLE_HOME}:\$LD_LIBRARY_PATH}
+  export PATH=${ORACLE_HOME}:\$PATH
+  export TNS_ADMIN=${ORACLE_HOME}/network/admin
+  export PKG_CONFIG_PATH=${ORACLE_HOME}
+  export PKG_CONFIG_LIBDIR=$PKG_CONFIG_LIBDIR:${ORACLE_HOME}
+EOF
+
+source ${BUILD_DIR}/.profile.d/oracle.sh
 
 indent "Create oci8.pc"
-cat <<EOF > ${ORACLE_HOME}/oci8.pc
+cat <<EOF > ${PKG_CONFIG_PATH}/oci8.pc
 # Package Information for pkg-config
 
 prefix=${ORACLE_HOME}
@@ -72,20 +85,7 @@ Libs.private:
 Cflags: -I\${includedir}
 EOF
 
-indent "Create profile.d script"
-mkdir -p ${BUILD_DIR}/.profile.d
-
-cat <<EOF > ${BUILD_DIR}/.profile.d/oracle.sh
-  export OCI_LIB_DIR=${ORACLE_HOME}
-  export ORACLE_HOME=${ORACLE_HOME}
-  export OCI_INC_DIR=${ORACLE_HOME}/sdk/include
-  export LD_LIBRARY_PATH=${ORACLE_HOME}:\$LD_LIBRARY_PATH}
-  export PATH=${ORACLE_HOME}:\$PATH
-  export TNS_ADMIN=${ORACLE_HOME}/network/admin
-  export PKG_CONFIG_PATH=${ORACLE_HOME}
-EOF
-
-source ${BUILD_DIR}/.profile.d/oracle.sh
+export PKG_CONFIG_PATH=${ORACLE_HOME}
 
 indent "Save build LD_LIBRARY_PATH to ENV_DIR"
 LD_LIBRARY_PATH_FILE="$ENV_DIR/LD_LIBRARY_PATH"
