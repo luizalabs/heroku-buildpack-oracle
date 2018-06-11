@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+export ORACLE_HOME=/tmp/build/oracle/oracle_instantclient
+export PKG_CONFIG_PATH=/tmp/build/oracle/oracle_instantclient
+export OCI_LIB_DIR=${ORACLE_HOME}
+export OCI_INC_DIR=${ORACLE_HOME}/sdk/include
+export LD_LIBRARY_PATH=${ORACLE_HOME}:${LD_LIBRARY_PATH}
+export PATH=${ORACLE_HOME}:$PATH

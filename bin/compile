@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-
 # Usage:
 #
 #     $ bin/compile <build-dir> <env-path>
@@ -12,7 +11,7 @@ ENV_DIR=$2
 BIN_DIR=$(cd "$(dirname "$0")"; pwd) # absolute path
 
 ORACLE_CONFIG="${BUILD_DIR}/.oracle.yml"
-ORACLE_INSTANT_CLIENT_DIR="vendor/oracle_instantclient"
+ORACLE_INSTANT_CLIENT_DIR="oracle/oracle_instantclient"
 ORACLE_INSTANT_CLIENT_URL="http://buildpacks.teresa-apps.io/oracle/oracle-instantclient-full-12.1-linux.x64.tar.gz"
 ORACLE_INSTANT_CLIENT_FILENAME=$(echo $ORACLE_INSTANT_CLIENT_URL | cut -d/ -f5)
 
@@ -39,19 +38,37 @@ mkdir -p ${ORACLE_NETWORK_ADMIN_DIR}
 
 if [[ -s $ORACLE_CONFIG ]]; then
   TNSNAMES_FILENAME=$(grep tnsnames.ora $ORACLE_CONFIG | cut -d' ' -f2)
-  if [[ -f $BUILD_DIR/$TNSNAMES_FILENAME ]]; then
+  if [[ -f $HOME/$TNSNAMES_FILENAME ]]; then
     indent "Symlinking ${TNSNAMES_FILENAME} to ${ORACLE_INSTANT_CLIENT_DIR}/network/admin/tnsnames.ora"
-    ln -sf $BUILD_DIR/$TNSNAMES_FILENAME ${ORACLE_NETWORK_ADMIN_DIR}/tnsnames.ora
+    ln -sf $HOME/$TNSNAMES_FILENAME ${ORACLE_NETWORK_ADMIN_DIR}/tnsnames.ora
   fi
 
   SQLNET_FILENAME=$(grep sqlnet.ora $ORACLE_CONFIG | cut -d' ' -f2)
-  if [[ -f $BUILD_DIR/$SQLNET_FILENAME ]]; then
+  if [[ -f $HOME/$SQLNET_FILENAME ]]; then
     indent "Symlinking ${SQLNET_FILENAME} to ${ORACLE_INSTANT_CLIENT_DIR}/network/admin/sqlnet.ora"
-    ln -sf $BUILD_DIR/$SQLNET_FILENAME ${ORACLE_NETWORK_ADMIN_DIR}/sqlnet.ora
+    ln -sf $HOME/$SQLNET_FILENAME ${ORACLE_NETWORK_ADMIN_DIR}/sqlnet.ora
   fi
 fi
 
 ORACLE_HOME="${BUILD_DIR}/${ORACLE_INSTANT_CLIENT_DIR}"
+
+PKG_CONFIG_PATH=${ORACLE_HOME}
+
+indent "Create oci8.pc"
+cat <<EOF > ${PKG_CONFIG_PATH}/oci8.pc
+# Package Information for pkg-config
+
+prefix=${BUILD_DIR}/oracle/oracle_instantclient
+libdir=\${prefix}
+includedir=\${prefix}/sdk/include/
+
+Name: OCI
+Description: Oracle database engine
+Version: 11.2
+Libs: -L\${prefix} -lclntsh
+Libs.private:
+Cflags: -I\${prefix}/sdk/include/
+EOF
 
 indent "Create profile.d script"
 mkdir -p ${BUILD_DIR}/.profile.d
@@ -60,7 +77,7 @@ cat <<EOF > ${BUILD_DIR}/.profile.d/oracle.sh
   export OCI_LIB_DIR=${ORACLE_HOME}
   export ORACLE_HOME=${ORACLE_HOME}
   export OCI_INC_DIR=${ORACLE_HOME}/sdk/include
-  export LD_LIBRARY_PATH=${ORACLE_HOME}:\$LD_LIBRARY_PATH}
+  export LD_LIBRARY_PATH=${ORACLE_HOME}
   export PATH=${ORACLE_HOME}:\$PATH
   export TNS_ADMIN=${ORACLE_HOME}/network/admin
   export PKG_CONFIG_PATH=${ORACLE_HOME}
@@ -69,23 +86,6 @@ EOF
 
 source ${BUILD_DIR}/.profile.d/oracle.sh
 
-indent "Create oci8.pc"
-cat <<EOF > ${PKG_CONFIG_PATH}/oci8.pc
-# Package Information for pkg-config
-
-prefix=${ORACLE_HOME}
-libdir=\${prefix}
-includedir=\${prefix}/sdk/include/
-
-Name: OCI
-Description: Oracle database engine
-Version: 11.2
-Libs: -L\${libdir} -lclntsh
-Libs.private:
-Cflags: -I\${includedir}
-EOF
-
-export PKG_CONFIG_PATH=${ORACLE_HOME}
 
 indent "Save build LD_LIBRARY_PATH to ENV_DIR"
 LD_LIBRARY_PATH_FILE="$ENV_DIR/LD_LIBRARY_PATH"
