@@ -38,15 +38,15 @@ mkdir -p ${ORACLE_NETWORK_ADMIN_DIR}
 
 if [[ -s $ORACLE_CONFIG ]]; then
   TNSNAMES_FILENAME=$(grep tnsnames.ora $ORACLE_CONFIG | cut -d' ' -f2)
-  if [[ -f $HOME/$TNSNAMES_FILENAME ]]; then
+  if [[ -f $BUILD_DIR/$TNSNAMES_FILENAME ]]; then
     indent "Symlinking ${TNSNAMES_FILENAME} to ${ORACLE_INSTANT_CLIENT_DIR}/network/admin/tnsnames.ora"
-    ln -sf $HOME/$TNSNAMES_FILENAME ${ORACLE_NETWORK_ADMIN_DIR}/tnsnames.ora
+    ln -sf $BUILD_DIR/$TNSNAMES_FILENAME ${ORACLE_NETWORK_ADMIN_DIR}/tnsnames.ora
   fi
 
   SQLNET_FILENAME=$(grep sqlnet.ora $ORACLE_CONFIG | cut -d' ' -f2)
-  if [[ -f $HOME/$SQLNET_FILENAME ]]; then
+  if [[ -f $BUILD_DIR/$SQLNET_FILENAME ]]; then
     indent "Symlinking ${SQLNET_FILENAME} to ${ORACLE_INSTANT_CLIENT_DIR}/network/admin/sqlnet.ora"
-    ln -sf $HOME/$SQLNET_FILENAME ${ORACLE_NETWORK_ADMIN_DIR}/sqlnet.ora
+    ln -sf $BUILD_DIR/$SQLNET_FILENAME ${ORACLE_NETWORK_ADMIN_DIR}/sqlnet.ora
   fi
 fi
 
@@ -79,7 +79,7 @@ cat <<EOF > ${BUILD_DIR}/.profile.d/oracle.sh
   export OCI_LIB_DIR=${ORACLE_HOME}
   export ORACLE_HOME=${ORACLE_HOME}
   export OCI_INC_DIR=${ORACLE_HOME}/sdk/include
-  export LD_LIBRARY_PATH=${ORACLE_HOME}
+  export LD_LIBRARY_PATH=${ORACLE_HOME}:\$LD_LIBRARY_PATH
   export PATH=${ORACLE_HOME}:\$PATH
   export TNS_ADMIN=${ORACLE_HOME}/network/admin
   export PKG_CONFIG_PATH=${ORACLE_HOME}
